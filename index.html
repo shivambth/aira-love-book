@@ -1,1 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17120f">
+  <title>For Aira ❤️</title>
 
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="app">
+
+    <!-- INTRO -->
+    <section id="intro" class="screen active">
+      <div class="book-shadow"></div>
+
+      <div id="book" class="book closed">
+
+        <!-- BOOK COVER -->
+        <div class="cover">
+          <div class="cover-inner">
+            <div class="cover-decoration">♡</div>
+
+            <p class="small-title">A LITTLE BOOK</p>
+
+            <h1>
+              For<br>
+              <span>Aira</span>
+            </h1>
+
+            <div class="cover-line"></div>
+
+            <p class="cover-date">
+              06.07.2026 — Forever
+            </p>
+
+            <div class="cover-heart">♥</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="intro-text">
+        <p>Someone made this little book for you...</p>
+        <span>Swipe up to open</span>
+      </div>
+    </section>
+
+
+    <!-- BOOK EXPERIENCE -->
+    <section id="bookScreen" class="screen">
+
+      <div class="book-stage">
+
+        <div id="realBook" class="real-book">
+
+          <!-- LEFT PAGE -->
+          <div class="page left-page">
+            <div class="page-content">
+              <span class="page-number">01</span>
+
+              <p class="eyebrow">
+                OUR STORY
+              </p>
+
+              <h2>
+                It all started<br>
+                with a simple hello.
+              </h2>
+
+              <div class="page-divider"></div>
+
+              <p>
+                I didn't know that one random meeting
+                would slowly become one of the most
+                beautiful parts of my life.
+              </p>
+
+              <p class="signature">
+                — Shivam
+              </p>
+            </div>
+          </div>
+
+
+          <!-- RIGHT PAGE -->
+          <div class="page right-page">
+            <div class="page-content">
+
+              <span class="page-number">02</span>
+
+              <div class="photo-placeholder">
+                <span>YOUR PHOTO HERE ❤️</span>
+              </div>
+
+              <p class="photo-caption">
+                The beginning of us.
+              </p>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="book-controls">
+
+        <button id="prevPage" aria-label="Previous page">
+          ←
+        </button>
+
+        <div class="book-progress">
+          <span id="currentPage">1</span>
+          <span>/</span>
+          <span id="totalPages">10</span>
+        </div>
+
+        <button id="nextPage" aria-label="Next page">
+          →
+        </button>
+
+      </div>
+
+      <p class="swipe-hint">
+        Swipe left or right to turn the page
+      </p>
+
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

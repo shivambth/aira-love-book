@@ -85,6 +85,32 @@ const photos = [
   "5fd0c8b4-6523-4817-a181-1c88e40dca91.jpeg",
   "5e005d63-93a7-4cc6-acb3-351cc6fc3010.jpeg"
 ];
+  /* =====================================
+   DISPLAY PHOTOS IN BOOK
+===================================== */
+
+const photoFrames = document.querySelectorAll(
+  ".photo-placeholder"
+);
+
+photoFrames.forEach((frame, index) => {
+
+  if (!photos[index]) return;
+
+  const img = document.createElement("img");
+
+  img.src = `assets/photos/${photos[index]}`;
+  img.alt = `Aira memory ${index + 1}`;
+
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "cover";
+  img.style.display = "block";
+
+  frame.style.overflow = "hidden";
+  frame.replaceChildren(img);
+
+});
   totalPages.textContent = total;
 
 

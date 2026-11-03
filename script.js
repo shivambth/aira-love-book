@@ -1,235 +1,433 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  const intro = document.getElementById("intro");
+  const opening = document.getElementById("opening");
+  const coverBook = document.getElementById("coverBook");
+  const flipbookScreen = document.getElementById("flipbookScreen");
   const book = document.getElementById("book");
-  const bookScreen = document.getElementById("bookScreen");
-  const realBook = document.getElementById("realBook");
 
-  const prevButton = document.getElementById("prevPage");
-  const nextButton = document.getElementById("nextPage");
+  const pages = Array.from(
+    document.querySelectorAll(".page")
+  );
 
-  const currentPage = document.getElementById("currentPage");
-  const totalPages = document.getElementById("totalPages");
+  const previousButton =
+    document.getElementById("previousPage");
 
-  let bookOpened = false;
-  let page = 1;
-  const pages = 10;
+  const nextButton =
+    document.getElementById("nextPage");
 
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchStartTime = 0;
+  const currentPage =
+    document.getElementById("currentPage");
 
-  totalPages.textContent = pages;
+  const totalPages =
+    document.getElementById("totalPages");
+
+  let opened = false;
+  let current = 0;
+
+  let dragging = false;
+  let startX = 0;
+  let currentX = 0;
+
+  const total = pages.length;
+
+  totalPages.textContent = total;
 
 
-  /* =========================
-     OPEN BOOK
-  ========================= */
+  /* =====================================
+     OPEN THE COVER
+  ===================================== */
 
   function openBook() {
 
-    if (bookOpened) return;
+    if (opened) return;
 
-    bookOpened = true;
+    opened = true;
 
-    book.classList.remove("closed");
-    book.classList.add("opening");
+    coverBook.style.transform =
+      "rotateX(5deg) rotateY(-8deg) rotateZ(-1deg) translateX(-4px)";
+
+    coverBook.style.opacity = "0";
 
     setTimeout(() => {
 
-      intro.classList.remove("active");
-      bookScreen.classList.add("active");
+      opening.style.display = "none";
 
-    }, 850);
+      flipbookScreen.classList.add("active");
+
+      book.style.opacity = "1";
+
+      updatePages();
+
+    }, 1000);
   }
 
 
-  /* =========================
-     INTRO TOUCH / SWIPE
-  ========================= */
+  /* =====================================
+     COVER SWIPE
+  ===================================== */
 
-  intro.addEventListener("touchstart", (event) => {
+  let coverStartY = 0;
 
-    const touch = event.changedTouches[0];
+  opening.addEventListener(
+    "touchstart",
+    (event) => {
 
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-    touchStartTime = Date.now();
+      coverStartY =
+        event.changedTouches[0].clientY;
 
-  }, { passive: true });
-
-
-  intro.addEventListener("touchend", (event) => {
-
-    const touch = event.changedTouches[0];
-
-    const differenceX = touch.clientX - touchStartX;
-    const differenceY = touch.clientY - touchStartY;
-
-    const elapsed = Date.now() - touchStartTime;
-
-    const swipeDistance =
-      Math.sqrt(
-        differenceX * differenceX +
-        differenceY * differenceY
-      );
-
-    if (
-      swipeDistance > 45 &&
-      elapsed < 1000
-    ) {
-      openBook();
-    }
-
-  }, { passive: true });
+    },
+    { passive: true }
+  );
 
 
-  /* =========================
-     TAP TO OPEN
-  ========================= */
+  opening.addEventListener(
+    "touchend",
+    (event) => {
 
-  book.addEventListener("click", () => {
-    openBook();
-  });
+      const endY =
+        event.changedTouches[0].clientY;
+
+      const distance =
+        coverStartY - endY;
+
+      if (distance > 40) {
+        openBook();
+      }
+
+    },
+    { passive: true }
+  );
 
 
-  /* =========================
-     PAGE TURN
-  ========================= */
+  coverBook.addEventListener(
+    "click",
+    openBook
+  );
 
-  function turnPage(direction) {
 
-    if (!bookOpened) return;
+  /* =====================================
+     PAGE SETUP
+  ===================================== */
 
-    if (direction === "next") {
+  function updatePages() {
 
-      if (page >= pages) return;
+    pages.forEach((page, index) => {
 
-      page++;
+      const pageNumber = index + 1;
 
-      realBook.classList.remove("turning-forward");
-      realBook.classList.remove("turning-backward");
+      page.style.transition =
+        "transform .65s cubic-bezier(.2,.7,.15,1)";
 
-      void realBook.offsetWidth;
+      if (pageNumber <= current) {
 
-      realBook.classList.add("turning-forward");
+        page.style.transform =
+          "rotateY(-180deg)";
 
-    }
+        page.style.zIndex =
+          String(pageNumber);
 
-    if (direction === "previous") {
+      } else {
 
-      if (page <= 1) return;
+        page.style.transform =
+          "rotateY(0deg)";
 
-      page--;
+        page.style.zIndex =
+          String(total - pageNumber + 10);
+      }
 
-      realBook.classList.remove("turning-forward");
-      realBook.classList.remove("turning-backward");
+    });
 
-      void realBook.offsetWidth;
-
-      realBook.classList.add("turning-backward");
-    }
-
-    currentPage.textContent = page;
+    currentPage.textContent = current;
   }
 
 
-  /* =========================
-     BUTTONS
-  ========================= */
+  /* =====================================
+     START DRAG
+  ===================================== */
 
-  nextButton.addEventListener("click", () => {
-    turnPage("next");
-  });
+  function startDrag(clientX) {
 
-  prevButton.addEventListener("click", () => {
-    turnPage("previous");
-  });
+    if (!opened) return;
+
+    dragging = true;
+
+    startX = clientX;
+    currentX = clientX;
+
+    const activePage =
+      getActivePage();
+
+    if (!activePage) {
+
+      dragging = false;
+      return;
+    }
+
+    activePage.style.transition =
+      "none";
+  }
 
 
-  /* =========================
-     BOOK SWIPE
-  ========================= */
+  /* =====================================
+     DRAGGING
+  ===================================== */
 
-  bookScreen.addEventListener("touchstart", (event) => {
+  function moveDrag(clientX) {
 
-    const touch = event.changedTouches[0];
+    if (!dragging) return;
 
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-    touchStartTime = Date.now();
+    currentX = clientX;
 
-  }, { passive: true });
+    const activePage =
+      getActivePage();
 
+    if (!activePage) return;
 
-  bookScreen.addEventListener("touchend", (event) => {
+    const rect =
+      book.getBoundingClientRect();
 
-    const touch = event.changedTouches[0];
+    const width =
+      rect.width / 2;
 
-    const differenceX = touch.clientX - touchStartX;
-    const differenceY = touch.clientY - touchStartY;
+    let distance =
+      startX - currentX;
 
-    const elapsed = Date.now() - touchStartTime;
+    distance =
+      Math.max(0, Math.min(distance, width));
+
+    let progress =
+      distance / width;
 
     /*
-      Ignore vertical scrolling gestures.
+      0 = page completely flat
+      1 = page completely turned
     */
 
-    if (
-      Math.abs(differenceX) < 45 ||
-      Math.abs(differenceX) < Math.abs(differenceY)
-    ) {
-      return;
+    const angle =
+      -180 * progress;
+
+    activePage.style.transform =
+      `rotateY(${angle}deg)`;
+
+    /*
+      Dynamic shadow during page curl
+    */
+
+    const shadow =
+      0.15 + (progress * 0.45);
+
+    activePage.style.boxShadow =
+      `inset 12px 0 22px rgba(70,45,25,.13),
+       ${-8 * progress}px
+       ${8 * progress}px
+       ${18 + progress * 20}px
+       rgba(0,0,0,${shadow})`;
+  }
+
+
+  /* =====================================
+     END DRAG
+  ===================================== */
+
+  function endDrag() {
+
+    if (!dragging) return;
+
+    dragging = false;
+
+    const activePage =
+      getActivePage();
+
+    if (!activePage) return;
+
+    const distance =
+      startX - currentX;
+
+    const rect =
+      book.getBoundingClientRect();
+
+    const half =
+      rect.width / 2;
+
+    activePage.style.transition =
+      "transform .55s cubic-bezier(.2,.8,.15,1)";
+
+    /*
+      More than 25% swipe =
+      complete page turn
+    */
+
+    if (distance > half * 0.25) {
+
+      current++;
+
     }
 
-    if (elapsed > 1200) {
-      return;
+    updatePages();
+
+    activePage.style.boxShadow = "";
+  }
+
+
+  /* =====================================
+     GET CURRENT PAGE
+  ===================================== */
+
+  function getActivePage() {
+
+    if (current >= total) {
+      return null;
     }
 
-    if (differenceX < 0) {
+    return pages[current];
+  }
 
-      // Swipe left = next page
-      turnPage("next");
 
-    } else {
+  /* =====================================
+     TOUCH EVENTS
+  ===================================== */
 
-      // Swipe right = previous page
-      turnPage("previous");
+  book.addEventListener(
+    "touchstart",
+    (event) => {
+
+      const touch =
+        event.changedTouches[0];
+
+      startDrag(touch.clientX);
+
+    },
+    { passive: true }
+  );
+
+
+  book.addEventListener(
+    "touchmove",
+    (event) => {
+
+      if (!dragging) return;
+
+      const touch =
+        event.changedTouches[0];
+
+      moveDrag(touch.clientX);
+
+    },
+    { passive: true }
+  );
+
+
+  book.addEventListener(
+    "touchend",
+    endDrag,
+    { passive: true }
+  );
+
+
+  /* =====================================
+     MOUSE SUPPORT
+  ===================================== */
+
+  book.addEventListener(
+    "mousedown",
+    (event) => {
+
+      startDrag(event.clientX);
 
     }
+  );
 
-  }, { passive: true });
+
+  window.addEventListener(
+    "mousemove",
+    (event) => {
+
+      moveDrag(event.clientX);
+
+    }
+  );
 
 
-  /* =========================
+  window.addEventListener(
+    "mouseup",
+    endDrag
+  );
+
+
+  /* =====================================
+     BUTTONS
+  ===================================== */
+
+  nextButton.addEventListener(
+    "click",
+    () => {
+
+      if (!opened) return;
+
+      if (current >= total) return;
+
+      current++;
+
+      updatePages();
+
+    }
+  );
+
+
+  previousButton.addEventListener(
+    "click",
+    () => {
+
+      if (!opened) return;
+
+      if (current <= 0) return;
+
+      current--;
+
+      updatePages();
+
+    }
+  );
+
+
+  /* =====================================
      KEYBOARD
-  ========================= */
+  ===================================== */
 
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener(
+    "keydown",
+    (event) => {
 
-    if (!bookOpened) return;
+      if (!opened) return;
 
-    if (event.key === "ArrowRight") {
-      turnPage("next");
+      if (event.key === "ArrowRight") {
+
+        if (current < total) {
+          current++;
+          updatePages();
+        }
+
+      }
+
+      if (event.key === "ArrowLeft") {
+
+        if (current > 0) {
+          current--;
+          updatePages();
+        }
+
+      }
+
     }
-
-    if (event.key === "ArrowLeft") {
-      turnPage("previous");
-    }
-
-  });
+  );
 
 
-  /* =========================
-     CLEAN ANIMATION CLASSES
-  ========================= */
+  /* =====================================
+     INITIAL STATE
+  ===================================== */
 
-  realBook.addEventListener("animationend", () => {
+  flipbookScreen.classList.remove("active");
 
-    realBook.classList.remove("turning-forward");
-    realBook.classList.remove("turning-backward");
-
-  });
-
+  book.style.opacity = "0";
 
 });
